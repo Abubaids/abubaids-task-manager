@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abubaids Family Task Hub</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+
+        header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+        }
+
+        header nav ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        header nav ul li {
+            display: inline;
+            margin: 0 10px;
+        }
+
+        header nav ul li a {
+            color: white;
+            text-decoration: none;
+        }
+
+        main {
+            padding: 20px;
+        }
+
+        .task-container {
+            display: none;
+        }
+
+        .task-container.active {
+            display: block;
+        }
+
+        .task-form {
+            margin-top: 10px;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        ul li {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+        }
+
+        ul li button {
+            background-color: #ff4d4d;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 5px 10px;
+        }
+
+        ul li button:hover {
+            background-color: #e43f3f;
+        }
+
+        footer {
+            text-align: center;
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 0;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Welcome to the Abubaids Family Task Hub</h1>
+        <nav>
+            <ul>
+                <li><a href="#" onclick="showTasks('bilal')">Bilal</a></li>
+                <li><a href="#" onclick="showTasks('abdullah')">Abdullah</a></li>
+                <li><a href="#" onclick="showTasks('mum')">Mum</a></li>
+                <li><a href="#" onclick="showTasks('dad')">Dad</a></li>
+                <li><a href="#" onclick="showTasks('punitha')">Punitha</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section id="task-container">
+            <h2>Family Tasks</h2>
+            <div id="task-display"></div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Abubaids Family Task Hub</p>
+    </footer>
+
+    <script>
+        const taskData = JSON.parse(localStorage.getItem("tasks")) || {};
+
+        function saveTasks() {
+            localStorage.setItem("tasks", JSON.stringify(taskData));
+        }
+
+        function fetchTasks() {
+            const container = document.getElementById("task-display");
+            container.innerHTML = "";
+
+            Object.keys(taskData).forEach(person => {
+                const section = document.createElement("section");
+                section.innerHTML = `
+                    <h3>${person.charAt(0).toUpperCase() + person.slice(1)}'s Tasks</h3>
+                    <ul id="${person}-tasks">
+                        ${taskData[person]
+                            .map(task => `<li>${task} <button onclick="removeTask('${person}', '${task}')">Remove</button></li>`)
+                            .join("")}
+                    </ul>
+                    <div>
+                        <input type="text" id="${person}-input" placeholder="Enter new task">
+                        <button onclick="addTask('${person}')">Add Task</button>
+                    </div>
+                `;
+                container.appendChild(section);
+            });
+        }
+
+        function addTask(person) {
+            const input = document.getElementById(`${person}-input`);
+            const newTask = input.value.trim();
+
+            if (!newTask) return;
+
+            if (!taskData[person]) {
+                taskData[person] = [];
+            }
+            taskData[person].push(newTask);
+            saveTasks();
+            input.value = "";
+            fetchTasks();
+        }
+
+        function removeTask(person, task) {
+            taskData[person] = taskData[person].filter(t => t !== task);
+            saveTasks();
+            fetchTasks();
+        }
+
+        function showTasks(person) {
+            const container = document.getElementById("task-container");
+            const taskDisplay = document.getElementById("task-display");
+
+            taskDisplay.innerHTML = `
+                <h3>${person.charAt(0).toUpperCase() + person.slice(1)}'s Tasks</h3>
+                <ul id="${person}-tasks">
+                    ${taskData[person] ? taskData[person]
+                        .map(task => `<li>${task} <button onclick="removeTask('${person}', '${task}')">Remove</button></li>`)
+                        .join("") : ""}
+                </ul>
+                <div>
+                    <input type="text" id="${person}-input" placeholder="Enter new task">
+                    <button onclick="addTask('${person}')">Add Task</button>
+                </div>
+            `;
+            container.classList.add("active");
+        }
+
+        // Initialize the app
+        fetchTasks();
+    </script>
+</body>
+</html>
